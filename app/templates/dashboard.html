@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Habit Tracker</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #f4f6f8;
+        color: #1f2933;
+      }
+      .container {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      .card {
+        background: #ffffff;
+        border: 1px solid #d9e2ec;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      h1, h2, h3 {
+        margin-top: 0;
+      }
+      .meta {
+        color: #52606d;
+        margin-bottom: 8px;
+      }
+      .flash {
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+      }
+      .flash.success {
+        background: #d9fbe5;
+        border: 1px solid #9ee2ba;
+      }
+      .flash.error {
+        background: #ffe3e3;
+        border: 1px solid #ffb3b3;
+      }
+      form {
+        margin: 8px 0;
+      }
+      input[type="text"] {
+        padding: 8px;
+        border: 1px solid #bcccdc;
+        border-radius: 4px;
+        min-width: 220px;
+      }
+      button {
+        padding: 8px 10px;
+        border: 1px solid #829ab1;
+        border-radius: 4px;
+        background: #f0f4f8;
+        cursor: pointer;
+      }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+      }
+      th, td {
+        border: 1px solid #d9e2ec;
+        padding: 6px;
+        text-align: center;
+        font-size: 14px;
+      }
+      .empty {
+        color: #52606d;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Habit Tracker Dashboard</h1>
+      <p class="meta">Today: {{ today }}</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <section class="card">
+        <h2>Create Habit</h2>
+        <form method="post" action="{{ url_for('habits.add_habit') }}">
+          <label for="name">Habit name:</label>
+          <input id="name" name="name" type="text" required>
+          <button type="submit">Add Habit</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Your Habits</h2>
+        {% if not habits %}
+          <p class="empty">No habits yet. Add your first habit above.</p>
+        {% endif %}
+
+        {% for habit in habits %}
+          <article class="card">
+            <h3>{{ habit.name }}</h3>
+            <p class="meta">Current streak: {{ habit.streak }}</p>
+
+            <form method="post" action="{{ url_for('habits.complete_habit', habit_id=habit.id) }}">
+              <button type="submit" {% if habit.completed_today %}disabled{% endif %}>
+                {% if habit.completed_today %}Completed Today{% else %}Mark Complete{% endif %}
+              </button>
+            </form>
+
+            <form method="post" action="{{ url_for('habits.edit_habit', habit_id=habit.id) }}">
+              <label for="edit-{{ habit.id }}">Edit name:</label>
+              <input id="edit-{{ habit.id }}" name="name" type="text" value="{{ habit.name }}" required>
+              <button type="submit">Save Name</button>
+            </form>
+
+            <form method="post" action="{{ url_for('habits.delete_habit', habit_id=habit.id) }}">
+              <button type="submit">Delete Habit</button>
+            </form>
+
+            <h4>Last 7 Days</h4>
+            <table>
+              <tr>
+                {% for day in habit.weekly_summary %}
+                  <th>{{ day.date }}</th>
+                {% endfor %}
+              </tr>
+              <tr>
+                {% for day in habit.weekly_summary %}
+                  <td>{% if day.completed %}Done{% else %}Missed{% endif %}</td>
+                {% endfor %}
+              </tr>
+            </table>
+          </article>
+        {% endfor %}
+      </section>
+    </div>
+  </body>
+</html>
+
