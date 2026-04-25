@@ -63,8 +63,3 @@ Optional environment variable:
 ```bash
 pytest
 ```
-
-## Notes for Report Alignment
-
-- `unmark complete` is not included in this MVP.
-- Test files are named to match the agreed structure: `test_routes.py`, `test_storage.py`, and `test_streaks.py`.
